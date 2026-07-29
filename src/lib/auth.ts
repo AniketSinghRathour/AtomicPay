@@ -33,7 +33,7 @@ export const auth = betterAuth({
           await db.insert(schema.wallets).values({
             id: uuidv4(),
             userId: user.id,
-            balance: 0n,
+            balance: BigInt(0),
           });
         }
       }
