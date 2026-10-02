@@ -1,0 +1,228 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 1150" width="100%" height="100%">
+  <defs>
+    <style>
+      .font-sans { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+      .font-mono { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+      
+      .title-main { font-size: 13.5px; font-weight: 700; fill: #0f172a; text-anchor: middle; }
+      .title-sub { font-size: 10.5px; font-weight: 500; fill: #475569; text-anchor: middle; }
+      .code-mono { font-size: 9.5px; font-weight: 600; fill: #334155; text-anchor: middle; }
+      
+      .edge-label { font-size: 10px; font-weight: 600; fill: #334155; }
+      .edge-green { font-size: 10.5px; font-weight: 700; fill: #15803d; }
+      .edge-red { font-size: 10.5px; font-weight: 700; fill: #b91c1c; }
+      .edge-amber { font-size: 10.5px; font-weight: 700; fill: #b45309; }
+      
+      .boundary-label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; fill: #475569; }
+    </style>
+
+    <!-- Soft Drop Shadow Filter matching system-architecture-lr.svg -->
+    <filter id="soft-shadow" x="-6%" y="-6%" width="112%" height="116%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.06" />
+    </filter>
+
+    <!-- Arrow Markers -->
+    <marker id="arrow-slate" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#475569" />
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#16a34a" />
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#dc2626" />
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#d97706" />
+    </marker>
+  </defs>
+
+  <!-- Clean Canvas Background -->
+  <rect width="880" height="1150" fill="#ffffff" rx="10" />
+
+  <!-- ======================================================== -->
+  <!-- 1. START NODE: INCOMING TRANSFER REQUEST -->
+  <!-- ======================================================== -->
+  <g class="font-sans" filter="url(#soft-shadow)">
+    <rect x="220" y="24" width="440" height="52" rx="26" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.8" />
+    <g transform="translate(245, 50)">
+      <path d="M -8 -3 L 5 -3" stroke="#2563eb" stroke-width="1.8" stroke-linecap="round" />
+      <polygon points="3,-6.5 8,-3 3,0.5" fill="#2563eb" />
+      <path d="M 8 3 L -5 3" stroke="#1d4ed8" stroke-width="1.8" stroke-linecap="round" />
+      <polygon points="-3,-0.5 -8,3 -3,6.5" fill="#1d4ed8" />
+    </g>
+    <text x="440" y="45" class="title-main" fill="#1e40af">Incoming Transfer Request</text>
+    <text x="440" y="62" class="title-sub" fill="#3b82f6">fromWallet • toWallet • amount • idempotencyKey • 4-Digit PIN</text>
+  </g>
+
+  <!-- Line 1 -> 2 -->
+  <line x1="440" y1="76" x2="440" y2="108" stroke="#475569" stroke-width="1.3" marker-end="url(#arrow-slate)" />
+
+  <!-- ======================================================== -->
+  <!-- 2. STEP 1: AUTH & PIN VERIFICATION -->
+  <!-- ======================================================== -->
+  <g class="font-sans" filter="url(#soft-shadow)">
+    <rect x="220" y="108" width="440" height="64" rx="8" fill="#ffffff" stroke="#22c55e" stroke-width="1.6" />
+    <text x="440" y="131" class="title-main">1. Authenticate PIN &amp; Session</text>
+    <text x="440" y="148" class="font-mono code-mono">SELECT ... FROM users u JOIN wallets w ON w.user_id = u.id</text>
+    <text x="440" y="162" class="title-sub">Single-join query validates credentials in 1 network round-trip</text>
+  </g>
+
+  <!-- Right Branch: Invalid PIN (Reject) -->
+  <path d="M 660 140 L 706 140" fill="none" stroke="#dc2626" stroke-width="1.3" marker-end="url(#arrow-red)" />
+  <rect x="664" y="127" width="38" height="15" rx="3" fill="#ffffff" />
+  <text x="683" y="137.5" class="font-sans edge-red" text-anchor="middle">Invalid</text>
+
+  <g class="font-sans" filter="url(#soft-shadow)">
+    <rect x="710" y="118" width="140" height="44" rx="6" fill="#fef2f2" stroke="#ef4444" stroke-width="1.5" />
+    <text x="780" y="138" class="title-main" fill="#b91c1c" font-size="12px">401 / 403 REJECT</text>
+    <text x="780" y="152" class="title-sub" fill="#dc2626" font-size="9.5px">Abort Unauthorized Tx</text>
+  </g>
+
+  <!-- Line 2 -> 3 -->
+  <line x1="440" y1="172" x2="440" y2="210" stroke="#16a34a" stroke-width="1.4" marker-end="url(#arrow-green)" />
+  <rect x="448" y="184" width="46" height="16" rx="3" fill="#ffffff" />
+  <text x="471" y="196" class="font-sans edge-green" text-anchor="middle">Valid PIN</text>
+
+  <!-- ======================================================== -->
+  <!-- 3. STEP 2: LEXICOGRAPHICAL LOCK ORDERING -->
+  <!-- ======================================================== -->
+  <g class="font-sans" filter="url(#soft-shadow)">
+    <rect x="180" y="210" width="520" height="72" rx="8" fill="#eff6ff" stroke="#0284c7" stroke-width="1.6" />
+    <text x="440" y="233" class="title-main" fill="#0369a1">2. Deterministic Lexicographical Lock Ordering</text>
+    <rect x="230" y="241" width="420" height="18" rx="4" fill="#ffffff" stroke="#bae6fd" stroke-width="1" />
+    <text x="440" y="254" class="font-mono code-mono" fill="#0284c7">firstLock = min(UUID_A, UUID_B)  |  secondLock = max(UUID_A, UUID_B)</text>
+    <text x="440" y="273" class="title-sub" fill="#0369a1">Eliminates circular-wait dependency graph — zero deadlocks under load</text>
+  </g>
+
+  <!-- Line 3 -> 4 into Transaction Boundary -->
+  <line x1="440" y1="282" x2="440" y2="322" stroke="#475569" stroke-width="1.3" marker-end="url(#arrow-slate)" />
+
+
+  <!-- ======================================================== -->
+  <!-- 4. ATOMIC DATABASE TRANSACTION BOUNDARY -->
+  <!-- ======================================================== -->
+  <rect x="40" y="318" width="800" height="616" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.4" stroke-dasharray="6,4" />
+  
+  <!-- Boundary Header Badge -->
+  <rect x="56" y="328" width="370" height="22" rx="4" fill="#e2e8f0" />
+  <text x="241" y="343" class="font-mono boundary-label" text-anchor="middle">POSTGRESQL TRANSACTION (READ COMMITTED)</text>
+
+
+  <!-- SUBSTEP 1: ROW LOCKS ACQUISITION -->
+  <g class="font-sans" filter="url(#soft-shadow)">
+    <rect x="160" y="362" width="560" height="74" rx="8" fill="#ffffff" stroke="#475569" stroke-width="1.5" />
+    <text x="440" y="384" class="title-main">STEP 1: Acquire Ordered Row Locks (FOR UPDATE)</text>
+    <text x="440" y="401" class="font-mono code-mono">1. SELECT id, balance FROM wallets WHERE id = firstLockId FOR UPDATE</text>
+    <text x="440" y="415" class="font-mono code-mono">2. SELECT id, balance FROM wallets WHERE id = secondLockId FOR UPDATE</text>
+    <text x="440" y="429" class="title-sub">Serializes all concurrent executions touching either counterparty wallet</text>
+  </g>
+
+  <!-- Line Step 1 -> Step 2 -->
+  <line x1="440" y1="436" x2="440" y2="466" stroke="#475569" stroke-width="1.3" marker-end="url(#arrow-slate)" />
+
+
+  <!-- SUBSTEP 2: DATABASE-ENFORCED IDEMPOTENCY GUARD -->
+  <g class="font-sans" filter="url(#soft-shadow)">
+    <rect x="160" y="466" width="560" height="74" rx="8" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.6" />
+    <text x="440" y="488" class="title-main" fill="#92400e">STEP 2: Database-Enforced Idempotency Guard</text>
+    <text x="440" y="506" class="font-mono code-mono" fill="#b45309">INSERT INTO transfers (...) ON CONFLICT (idempotency_key) DO NOTHING</text>
+    <text x="440" y="524" class="title-sub" fill="#92400e">Evaluates returned row count against database unique constraint</text>
+  </g>
+
+  <!-- Right Branch: Duplicate Retry (0 Rows) - NO BLACK SPOTS (fill="none") -->
+  <path d="M 720 503 L 740 503 L 740 554" fill="none" stroke="#d97706" stroke-width="1.4" marker-end="url(#arrow-amber)" />
+  <rect x="712" y="491" width="56" height="16" rx="3" fill="#ffffff" />
+  <text x="740" y="503" class="font-sans edge-amber" text-anchor="middle">0 Rows</text>
+
+  <!-- Duplicate Retry Card (Well within canvas boundaries) -->
+  <g class="font-sans" filter="url(#soft-shadow)">
+    <rect x="665" y="556" width="150" height="64" rx="6" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.5" />
+    <text x="740" y="577" class="title-main" fill="#92400e" font-size="11.5px">Duplicate Retry</text>
+    <text x="740" y="593" class="title-sub" fill="#b45309" font-size="9.5px">Return Cached Status</text>
+    <rect x="685" y="600" width="110" height="14" rx="3" fill="#fef3c7" />
+    <text x="740" y="610.5" class="font-mono code-mono" fill="#b45309" font-size="9px">idempotent: true</text>
+  </g>
+
+  <!-- Line Step 2 -> Step 3 (1 Row - New Txn) -->
+  <line x1="440" y1="540" x2="440" y2="576" stroke="#16a34a" stroke-width="1.4" marker-end="url(#arrow-green)" />
+  <rect x="448" y="550" width="86" height="16" rx="3" fill="#ffffff" />
+  <text x="491" y="562" class="font-sans edge-green" text-anchor="middle">1 Row (New Txn)</text>
+
+
+  <!-- SUBSTEP 3: POST-LOCK BALANCE DECISION DIAMOND -->
+  <g class="font-sans" filter="url(#soft-shadow)">
+    <polygon points="440,578 570,618 440,658 310,618" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.6" />
+    <text x="440" y="613" class="title-main" fill="#92400e" font-size="12px">Post-Lock Balance Check</text>
+    <text x="440" y="629" class="font-mono code-mono" fill="#b45309" font-size="10px">senderBalance &gt;= amount?</text>
+  </g>
+
+  <!-- Left Branch: Insufficient Funds (Straight Horizontal Line - ZERO OVERLAP) -->
+  <line x1="310" y1="618" x2="242" y2="618" stroke="#dc2626" stroke-width="1.4" marker-end="url(#arrow-red)" />
+  <rect x="250" y="605" width="90" height="16" rx="3" fill="#ffffff" />
+  <text x="295" y="617" class="font-sans edge-red" text-anchor="middle">No (Insufficient)</text>
+
+  <!-- Failure Card on the Left (Positioned directly beside diamond, completely above Step 4) -->
+  <g class="font-sans" filter="url(#soft-shadow)">
+    <rect x="65" y="586" width="175" height="64" rx="6" fill="#fef2f2" stroke="#ef4444" stroke-width="1.5" />
+    <text x="152.5" y="607" class="title-main" fill="#b91c1c" font-size="11.5px">UPDATE status='FAILED'</text>
+    <text x="152.5" y="623" class="title-sub" fill="#dc2626" font-size="9.5px">Reason: 'Insufficient funds'</text>
+    <text x="152.5" y="638" class="title-sub" fill="#991b1b" font-size="9px">Commit failure audit record</text>
+  </g>
+
+  <!-- Line Step 3 -> Step 4 (Yes - Sufficient) -->
+  <line x1="440" y1="658" x2="440" y2="692" stroke="#16a34a" stroke-width="1.4" marker-end="url(#arrow-green)" />
+  <rect x="448" y="668" width="90" height="16" rx="3" fill="#ffffff" />
+  <text x="493" y="680" class="font-sans edge-green" text-anchor="middle">Yes (Sufficient)</text>
+
+
+  <!-- SUBSTEP 4: ATOMIC DOUBLE-ENTRY WRITES & BALANCE SYNC (Wide card with zero clipping) -->
+  <g class="font-sans" filter="url(#soft-shadow)">
+    <rect x="160" y="694" width="560" height="106" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.8" />
+    <text x="440" y="716" class="title-main" fill="#15803d">STEP 3: Atomic Double-Entry Ledger Writes &amp; Balance Sync</text>
+    <text x="440" y="734" class="font-mono code-mono" fill="#166534">1. INSERT INTO ledger_entries (wallet_id=sender, entry_type='DEBIT', amount)</text>
+    <text x="440" y="748" class="font-mono code-mono" fill="#166534">2. INSERT INTO ledger_entries (wallet_id=receiver, entry_type='CREDIT', amount)</text>
+    <text x="440" y="762" class="font-mono code-mono" fill="#166534">3. UPDATE wallets (sender - amount)  •  UPDATE wallets (receiver + amount)</text>
+    <text x="440" y="776" class="font-mono code-mono" fill="#166534">4. UPDATE transfers SET status = 'COMPLETED' WHERE id = transferId</text>
+    <text x="440" y="792" class="title-sub" fill="#15803d">All ledger transactions balance to exact net zero</text>
+  </g>
+
+  <!-- Line Step 4 -> Commit -->
+  <line x1="440" y1="800" x2="440" y2="830" stroke="#16a34a" stroke-width="1.4" marker-end="url(#arrow-green)" />
+
+
+  <!-- SUBSTEP 5: COMMIT TRANSACTION -->
+  <g class="font-sans" filter="url(#soft-shadow)">
+    <rect x="250" y="830" width="380" height="46" rx="6" fill="#ffffff" stroke="#16a34a" stroke-width="2" />
+    <text x="440" y="851" class="title-main" fill="#15803d" font-size="13.5px">COMMIT TRANSACTION</text>
+    <text x="440" y="865" class="title-sub" fill="#166534" font-size="9.5px">Atomically releases all row locks • Persists ledger state</text>
+  </g>
+
+  <!-- Line Commit -> Real-Time Broadcaster (Passing cleanly out of transaction container) -->
+  <line x1="440" y1="876" x2="440" y2="948" stroke="#475569" stroke-width="1.3" marker-end="url(#arrow-slate)" />
+
+
+  <!-- ======================================================== -->
+  <!-- 5. REAL-TIME EVENT BROADCAST (OUTSIDE TRANSACTION) -->
+  <!-- ======================================================== -->
+  <g class="font-sans" filter="url(#soft-shadow)">
+    <rect x="180" y="950" width="520" height="66" rx="8" fill="#faf5ff" stroke="#9333ea" stroke-width="1.6" />
+    <text x="440" y="974" class="title-main" fill="#7e22ce">Broadcast Real-Time Event via SSE (/api/sse)</text>
+    <text x="440" y="992" class="title-sub" fill="#6b21a8">Pushes Instant Invalidation to Counterparty SWR Caches</text>
+    <text x="440" y="1005" class="title-sub" fill="#9333ea" font-size="9.5px">Counterparty balance and ledger reflect new funds without polling</text>
+  </g>
+
+  <!-- Line Real-Time -> Success -->
+  <line x1="440" y1="1016" x2="440" y2="1052" stroke="#475569" stroke-width="1.3" marker-end="url(#arrow-slate)" />
+
+
+  <!-- ======================================================== -->
+  <!-- 6. FINAL SUCCESS NODE -->
+  <!-- ======================================================== -->
+  <g class="font-sans" filter="url(#soft-shadow)">
+    <rect x="250" y="1054" width="380" height="52" rx="26" fill="#ecfdf5" stroke="#10b981" stroke-width="1.8" />
+    <circle cx="278" cy="1080" r="10" fill="#10b981" />
+    <path d="M 274 1080 L 277 1083 L 282 1077" fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+    <text x="445" y="1075" class="title-main" fill="#065f46">Transfer Completed (200 OK)</text>
+    <text x="445" y="1092" class="title-sub" fill="#047857">HTTP Response returned with idempotent transfer payload</text>
+  </g>
+</svg>
