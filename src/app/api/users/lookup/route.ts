@@ -42,17 +42,22 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(query);
     const isUuid = UUID_REGEX.test(query);
 
-    // Build search conditions
-    const matchConditions = [
-      ilike(users.email, query),
-      ilike(users.name, query),
-    ];
-
-    if (isUuid) {
-      matchConditions.push(eq(wallets.id, query));
+    if (!isEmail && !isUuid) {
+      return NextResponse.json(
+        {
+          valid: false,
+          error: "Please enter a valid registered email address",
+        },
+        { status: 400 }
+      );
     }
+
+    const matchCondition = isUuid
+      ? eq(wallets.id, query)
+      : ilike(users.email, query);
 
     const [target] = await db
       .select({
@@ -67,14 +72,14 @@ export async function GET(req: NextRequest) {
         and(
           ne(users.id, "system-user-id"),
           notIlike(users.email, "load%"),
-          or(...matchConditions)
+          matchCondition
         )
       )
       .limit(1);
 
     if (!target) {
       return NextResponse.json(
-        { valid: false, error: "Wallet ID not found in AtomicPay ledger" },
+        { valid: false, error: "No user found with this email address" },
         { status: 404 }
       );
     }

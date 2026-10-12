@@ -16,6 +16,7 @@ export function RequestMoneyModal({
   onSuccess,
 }: RequestMoneyModalProps) {
   const [walletEmail, setWalletEmail] = useState("");
+  const [verifiedEmail, setVerifiedEmail] = useState("");
   const [toWalletId, setToWalletId] = useState("");
   const [counterpartyName, setCounterpartyName] = useState("");
   const [verificationStatus, setVerificationStatus] = useState<"idle" | "verifying" | "valid" | "invalid">("idle");
@@ -33,6 +34,7 @@ export function RequestMoneyModal({
   useEffect(() => {
     if (isOpen) {
       setWalletEmail("");
+      setVerifiedEmail("");
       setToWalletId("");
       setCounterpartyName("");
       setVerificationStatus("idle");
@@ -45,18 +47,24 @@ export function RequestMoneyModal({
     }
   }, [isOpen]);
 
-  // Debounced lookup
+  // Debounced lookup - immediately invalidates if input changes from verified email
   useEffect(() => {
-    const trimmed = walletEmail.trim();
-    if (!trimmed || trimmed.length < 2) {
-      setVerificationStatus("idle");
-      setVerificationMessage("");
-      setToWalletId("");
-      setCounterpartyName("");
+    const trimmed = walletEmail.trim().toLowerCase();
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+
+    // If input matches already verified email, keep current valid state
+    if (verifiedEmail && trimmed === verifiedEmail) {
       return;
     }
 
-    if (toWalletId && (trimmed.toLowerCase() === counterpartyName.toLowerCase() || trimmed.toLowerCase() === walletEmail.toLowerCase())) {
+    // Input changed from verified email: immediately invalidate previous verification
+    setToWalletId("");
+    setCounterpartyName("");
+    setVerifiedEmail("");
+
+    if (!isEmail) {
+      setVerificationStatus("idle");
+      setVerificationMessage("");
       return;
     }
 
@@ -68,24 +76,27 @@ export function RequestMoneyModal({
         if (res.ok && data.valid && data.user) {
           setVerificationStatus("valid");
           setVerificationMessage(`Verified: ${data.user.name}`);
+          setVerifiedEmail(trimmed);
           setToWalletId(data.user.walletId);
           setCounterpartyName(data.user.name);
         } else {
           setVerificationStatus("invalid");
-          setVerificationMessage(data.error || "Wallet ID not found");
+          setVerificationMessage(data.error || "User not found");
+          setVerifiedEmail("");
           setToWalletId("");
           setCounterpartyName("");
         }
       } catch (err) {
         setVerificationStatus("invalid");
         setVerificationMessage("Verification check failed");
+        setVerifiedEmail("");
         setToWalletId("");
         setCounterpartyName("");
       }
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [walletEmail, toWalletId, counterpartyName]);
+  }, [walletEmail, verifiedEmail]);
 
   if (!isOpen) return null;
 
@@ -120,7 +131,7 @@ export function RequestMoneyModal({
         return;
       }
 
-      await onSuccess();
+      onSuccess();
       setLastRequestedAmount(num);
       setLastRequestedRecipient(counterpartyName || walletEmail);
       setIsSuccess(true);

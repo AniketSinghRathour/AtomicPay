@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ArrowLeft, X, FileText, Check, Wallet } from "lucide-react";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { formatTxnTime } from "@/lib/formatters";
@@ -29,6 +29,17 @@ export function TransactionsDrawer({
 }: TransactionsDrawerProps) {
   const [txnFilter, setTxnFilter] = useState<FilterTab>("all");
 
+  // Lock background dashboard scroll when drawer is open
+  useEffect(() => {
+    if (isOpen) {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prevOverflow;
+      };
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const filteredTransactions = transactions.filter((t) => {
@@ -45,10 +56,16 @@ export function TransactionsDrawer({
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in select-none">
-      <div className="w-full max-w-2xl max-h-[85vh] flex flex-col animate-in zoom-in-95">
-        <SpotlightCard className="w-full h-full flex flex-col">
-          <div className="w-full space-y-4 flex flex-col h-full">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in select-none overscroll-none"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-2xl flex flex-col animate-in zoom-in-95"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <SpotlightCard className="w-full">
+          <div className="w-full space-y-4 flex flex-col">
             {/* Header: ← Transactions */}
             <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] shrink-0">
               <div className="flex items-center gap-2">
@@ -101,8 +118,8 @@ export function TransactionsDrawer({
               })}
             </div>
 
-            {/* Transactions Content */}
-            <div className="flex-1 overflow-y-auto pr-1">
+            {/* Transactions Content - capped at ~7-8 items, scrolls internally */}
+            <div className="overflow-y-auto overscroll-contain pr-1.5 max-h-[430px] custom-scrollbar">
               {txnFilter === "requests" ? (
                 pendingRequests.length === 0 ? (
                   <div className="py-12 flex flex-col items-center justify-center text-center space-y-2.5">

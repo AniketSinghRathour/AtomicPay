@@ -66,7 +66,7 @@ export function AddMoneyModal({
         return;
       }
 
-      await onSuccess();
+      onSuccess();
       setLastAddedAmount(amt);
       setIsSuccess(true);
     } catch (err: any) {
