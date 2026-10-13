@@ -1,5 +1,13 @@
 # AtomicPay 
 
+<p align="left">
+  <a href="https://github.com/AniketSinghRathour/AtomicPay/actions/workflows/ci.yml"><img src="https://github.com/AniketSinghRathour/AtomicPay/actions/workflows/ci.yml/badge.svg" alt="CI Concurrency & ACID Audit" /></a>
+  <a href="https://atomic-pay-aniketsinghrathours-projects.vercel.app"><img src="https://img.shields.io/badge/Vercel-Deployed-brightgreen?style=flat&logo=vercel" alt="Vercel Deployment" /></a>
+  <a href="#tech-stack--architectural-decisions"><img src="https://img.shields.io/badge/Next.js-16-black?style=flat&logo=next.js" alt="Next.js 16" /></a>
+  <a href="#concurrency-controls--acid-implementation"><img src="https://img.shields.io/badge/PostgreSQL-Neon-00E599?style=flat&logo=postgresql" alt="Neon PostgreSQL" /></a>
+  <a href="#license"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License" /></a>
+</p>
+
 A production-grade, peer-to-peer internal digital wallet and double-entry ledger platform engineered with **Next.js**, **PostgreSQL**, **BetterAuth**, and **Drizzle ORM**.
 
 AtomicPay is designed from the ground up to handle high-concurrency transactional challenges in payment systems: **race conditions**, **double-spending**, **cross-transfer deadlocks**, and **network-retry duplication**. Concurrency safety is enforced at the application-and-database boundary within a single atomic PostgreSQL transaction under `READ COMMITTED` isolation.
@@ -300,19 +308,38 @@ src/
 
 ---
 
+## Concurrency & ACID Test Suite
+
+AtomicPay includes a dedicated concurrency and stress test suite powered by [Vitest](https://vitest.dev) to verify transactional guarantees under live database contention. The suite is automatically executed on every commit and pull request via [GitHub Actions CI](https://github.com/AniketSinghRathour/AtomicPay/actions/workflows/ci.yml).
+
+### Stress Test Matrix & Verification Criteria
+
+| # | Test Scenario | Concurrency Load | Invariants & Assertions Tested |
+| :---: | :--- | :--- | :--- |
+| **1** | **Hot-Wallet Double-Spend** | 100 parallel ₹1 debits against ₹50 balance | Exactly 50 debits succeed; 50 fail with `Insufficient funds`. Final sender balance = ₹0.00 (**0 overdrafts**). |
+| **2** | **Opposing Transfers ($A \rightleftarrows B$)** | 30 simultaneous transfers (15 A→B and 15 B→A) | Lexicographical UUID lock ordering eliminates circular wait conditions (**0 deadlocks / `40P01`**). |
+| **3** | **3-Wallet Cycle ($A \rightarrow B \rightarrow C \rightarrow A$)** | 60 concurrent transfers (20 per directed edge) | Circular transfer paths serialize cleanly; sum of all 3 wallet balances is strictly conserved ($\Delta = 0$). |
+| **4** | **10-Wallet Randomized Mesh** | 60 randomized P2P transfers across 10 accounts | Multi-wallet cross-contention; total system balance remains invariant ($\sum \text{Balances} = \text{₹1,000.00}$). |
+| **5** | **Idempotency Storm Matrix** | 3 unique keys $\times$ 10 duplicate bursts (30 requests) | `ON CONFLICT DO NOTHING` guarantees exactly 3 database executions and 27 cached returns; 0 duplicate deductions. |
+| **6** | **Boundary Validation Guards** | Self-transfers (`from == to`) & extreme overdrafts | Rejection at application & database boundary without acquiring unnecessary row locks or corrupting state. |
+| **7** | **Atomic Rollback Invariant** | Mid-transaction exception simulation | Complete rollback under `READ COMMITTED`; zero partial debits, zero balance drift, zero orphan ledger rows. |
+| **8** | **Zero-Sum Ledger Audit** | Comprehensive SQL sum of all debits vs. credits | Mathematical conservation: $\sum \text{Credits} - \sum \text{Debits} = 0$ (**0.00% ledger drift**). |
+
+---
+
 ## Getting Started
 
 ### Prerequisites
 
 - **Node.js** 18.x or 20.x
-- **PostgreSQL Database** (e.g., [Neon Serverless PostgreSQL](https://neon.tech))
+- **PostgreSQL Database**
 
 ### Installation
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/atomicpay.git
-   cd atomicpay
+   git clone https://github.com/AniketSinghRathour/AtomicPay.git
+   cd AtomicPay
    ```
 
 2. **Install dependencies:**
@@ -341,7 +368,13 @@ src/
    npx drizzle-kit push
    ```
 
-5. **Start the development server:**
+5. **Run the ACID Concurrency & Stress Test Suite:**
+   ```bash
+   npm test
+   ```
+   Executes all 8 concurrency tests (double-spend, opposing deadlocks, cyclic transfers, and zero-sum ledger audit).
+
+6. **Start the development server:**
    ```bash
    npm run dev
    ```
